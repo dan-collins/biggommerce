@@ -2,9 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"time"
-
-	"github.com/google/go-querystring/query"
 )
 
 //StatusCount struct representing the individual statuses and count returned by BigCommerce GET /orders/count
@@ -235,53 +232,6 @@ type OrderProductOption struct {
 type Resource struct {
 	URL      string
 	Resource string
-}
-
-// OrderQuery struct to handle orders endpoint search query params
-type OrderQuery struct {
-	MinID              int       `url:"min_id,omitempty"`
-	MaxID              int       `url:"max_id,omitempty"`
-	MinTotal           float64   `url:"min_total,omitempty"`
-	MaxTotal           float64   `url:"max_total,omitempty"`
-	CustomerID         int       `url:"customer_id,omitempty"`
-	Email              string    `url:"email,omitempty"`
-	StatusID           int       `url:"status_id,omitempty"`
-	CartID             string    `url:"cart_id,omitempty"`
-	PaymentMethod      string    `url:"payment_method,omitempty"`
-	MinDateCreated     time.Time `url:"-"`
-	MaxDateCreated     time.Time `url:"-"`
-	MinDateModified    time.Time `url:"-"`
-	MaxDateModified    time.Time `url:"-"`
-	Page               int       `url:"page,omitempty"`
-	Limit              int       `url:"limit,omitempty"`
-	Sort               string    `url:"sort,omitempty"`
-	IsDeleted          bool      `url:"is_deleted,omitempty"`
-	MinDateCreatedRaw  string    `url:"min_date_created,omitempty"`
-	MaxDateCreatedRaw  string    `url:"max_date_created,omitempty"`
-	MinDateModifiedRaw string    `url:"min_date_modified,omitempty"`
-	MaxDateModifiedRaw string    `url:"max_date_modified,omitempty"`
-}
-
-// GetRawQuery gets the struct in query string form
-func (q OrderQuery) GetRawQuery() (raw string, err error) {
-	if !q.MinDateCreated.IsZero() {
-		q.MinDateCreatedRaw = q.MinDateCreated.Format(time.RFC1123Z)
-	}
-	if !q.MaxDateCreated.IsZero() {
-		q.MaxDateCreatedRaw = q.MaxDateCreated.Format(time.RFC1123Z)
-	}
-	if !q.MinDateModified.IsZero() {
-		q.MinDateModifiedRaw = q.MinDateModified.Format(time.RFC1123Z)
-	}
-	if !q.MaxDateModified.IsZero() {
-		q.MaxDateModifiedRaw = q.MaxDateModified.Format(time.RFC1123Z)
-	}
-	v, err := query.Values(q)
-	if err != nil {
-		return "", err
-	}
-	raw = v.Encode()
-	return
 }
 
 type Client interface {

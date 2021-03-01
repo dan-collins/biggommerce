@@ -1,6 +1,6 @@
-module github.com/dan-collins/big-gommerce
+module github.com/dan-collins/biggommerce
 
-go 1.16
+go 1.15
 
 require (
 	github.com/google/go-querystring v1.0.0

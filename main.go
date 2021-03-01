@@ -6,14 +6,15 @@ import (
 	"net/http"
 )
 
+const baseBCURL string = "https://api.bigcommerce.com/stores/"
+
 //BCClient represents the client wrapper containing BC specific connection details
 type BCClient struct {
 	AuthToken  string
 	AuthClient string
 	StoreKey   string
+	BaseURL    string
 }
-
-const baseURL string = "https://api.bigcommerce.com/stores/"
 
 //NewClient create a new client wrapper based on BC connection details
 func NewClient(authToken, authClient, storeKey string) *BCClient {
@@ -21,9 +22,12 @@ func NewClient(authToken, authClient, storeKey string) *BCClient {
 		AuthToken:  authToken,
 		AuthClient: authClient,
 		StoreKey:   storeKey,
+		BaseURL:    baseBCURL,
 	}
 }
-
+func (s *BCClient) SetBaseURL(url string) {
+	s.BaseURL = url
+}
 func (s *BCClient) doRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
@@ -47,7 +51,7 @@ func (s *BCClient) doRequest(req *http.Request) ([]byte, error) {
 }
 
 // GetBody - gets the request body of the url
-func (s *BCClient) GetBody(url string) (body []byte, err error) {
+func (s BCClient) GetBody(url string) (body []byte, err error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return

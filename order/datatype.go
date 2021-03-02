@@ -1,8 +1,6 @@
-package model
+package order
 
-import (
-	"encoding/json"
-)
+import "github.com/dan-collins/biggommerce/primative"
 
 //StatusCount struct representing the individual statuses and count returned by BigCommerce GET /orders/count
 type StatusCount struct {
@@ -73,21 +71,21 @@ type ShippingAddress struct {
 
 // Shipment struct representing BC shipment
 type Shipment struct {
-	ID                   int64       `json:"id"`
-	OrderID              int64       `json:"order_id"`
-	CustomerID           int64       `json:"customer_id"`
-	OrderAddressID       int64       `json:"order_address_id"`
-	DateCreated          BCDate      `json:"date_created"`
-	TrackingNumber       string      `json:"tracking_number"`
-	MerchantShippingCost float64     `json:"merchant_shipping_cost,string"`
-	ShippingMethod       string      `json:"shipping_method"`
-	Comments             string      `json:"comments"`
-	ShippingProvider     string      `json:"shipping_provider"`
-	TrackingCarrier      string      `json:"tracking_carrier"`
-	TrackingLink         string      `json:"tracking_link"`
-	BillingAddress       Address     `json:"billing_address"`
-	ShippingAddress      Address     `json:"shipping_address"`
-	Items                []OrderItem `json:"items"`
+	ID                   int64            `json:"id"`
+	OrderID              int64            `json:"order_id"`
+	CustomerID           int64            `json:"customer_id"`
+	OrderAddressID       int64            `json:"order_address_id"`
+	DateCreated          primative.BCDate `json:"date_created"`
+	TrackingNumber       string           `json:"tracking_number"`
+	MerchantShippingCost float64          `json:"merchant_shipping_cost,string"`
+	ShippingMethod       string           `json:"shipping_method"`
+	Comments             string           `json:"comments"`
+	ShippingProvider     string           `json:"shipping_provider"`
+	TrackingCarrier      string           `json:"tracking_carrier"`
+	TrackingLink         string           `json:"tracking_link"`
+	BillingAddress       Address          `json:"billing_address"`
+	ShippingAddress      Address          `json:"shipping_address"`
+	Items                []OrderItem      `json:"items"`
 }
 
 // OrderItem struct representing BC orderitem
@@ -99,66 +97,66 @@ type OrderItem struct {
 
 // Order struct representing the return body of BigCommerce GET /orders
 type Order struct {
-	ID                                      int64       `json:"id,omitempty"`
-	CustomerID                              int64       `json:"customer_id,omitempty"`
-	DateCreated                             BCDate      `json:"date_created,omitempty"`
-	DateModified                            BCDate      `json:"date_modified,omitempty"`
-	DateShipped                             BCDate      `json:"date_shipped,omitempty"`
-	StatusID                                int64       `json:"status_id,omitempty"`
-	Status                                  string      `json:"status,omitempty"`
-	SubtotalExTax                           string      `json:"subtotal_ex_tax,omitempty"`
-	SubtotalIncTax                          string      `json:"subtotal_inc_tax,omitempty"`
-	SubtotalTax                             string      `json:"subtotal_tax,omitempty"`
-	BaseShippingCost                        string      `json:"base_shipping_cost,omitempty"`
-	ShippingCostExTax                       string      `json:"shipping_cost_ex_tax,omitempty"`
-	ShippingCostIncTax                      string      `json:"shipping_cost_inc_tax,omitempty"`
-	ShippingCostTax                         string      `json:"shipping_cost_tax,omitempty"`
-	ShippingCostTaxClassID                  int64       `json:"shipping_cost_tax_class_id,omitempty"`
-	BaseHandlingCost                        string      `json:"base_handling_cost,omitempty"`
-	HandlingCostExTax                       string      `json:"handling_cost_ex_tax,omitempty"`
-	HandlingCostIncTax                      string      `json:"handling_cost_inc_tax,omitempty"`
-	HandlingCostTax                         string      `json:"handling_cost_tax,omitempty"`
-	HandlingCostTaxClassID                  int64       `json:"handling_cost_tax_class_id,omitempty"`
-	BaseWrappingCost                        string      `json:"base_wrapping_cost,omitempty"`
-	WrappingCostExTax                       string      `json:"wrapping_cost_ex_tax,omitempty"`
-	WrappingCostIncTax                      string      `json:"wrapping_cost_inc_tax,omitempty"`
-	WrappingCostTax                         string      `json:"wrapping_cost_tax,omitempty"`
-	WrappingCostTaxClassID                  int64       `json:"wrapping_cost_tax_class_id,omitempty"`
-	TotalExTax                              string      `json:"total_ex_tax,omitempty"`
-	TotalIncTax                             string      `json:"total_inc_tax,omitempty"`
-	TotalTax                                string      `json:"total_tax,omitempty"`
-	ItemsTotal                              int64       `json:"items_total,omitempty"`
-	ItemsShipped                            int64       `json:"items_shipped,omitempty"`
-	PaymentMethod                           string      `json:"payment_method,omitempty"`
-	PaymentProviderID                       string      `json:"payment_provider_id,omitempty"`
-	PaymentStatus                           string      `json:"payment_status,omitempty"`
-	RefundedAmount                          string      `json:"refunded_amount,omitempty"`
-	OrderIsDigital                          bool        `json:"order_is_digital,omitempty"`
-	StoreCreditAmount                       string      `json:"store_credit_amount,omitempty"`
-	GiftCertificateAmount                   string      `json:"gift_certificate_amount,omitempty"`
-	IPAddress                               string      `json:"ip_address,omitempty"`
-	GeoipCountry                            string      `json:"geoip_country,omitempty"`
-	GeoipCountryIso2                        string      `json:"geoip_country_iso2,omitempty"`
-	CurrencyID                              int64       `json:"currency_id,omitempty"`
-	CurrencyCode                            string      `json:"currency_code,omitempty"`
-	CurrencyExchangeRate                    string      `json:"currency_exchange_rate,omitempty"`
-	DefaultCurrencyID                       int64       `json:"default_currency_id,omitempty"`
-	DefaultCurrencyCode                     string      `json:"default_currency_code,omitempty"`
-	StaffNotes                              string      `json:"staff_notes,omitempty"`
-	CustomerMessage                         string      `json:"customer_message,omitempty"`
-	DiscountAmount                          string      `json:"discount_amount,omitempty"`
-	CouponDiscount                          string      `json:"coupon_discount,omitempty"`
-	ShippingAddressCount                    int64       `json:"shipping_address_count,omitempty"`
-	IsDeleted                               bool        `json:"is_deleted,omitempty"`
-	EbayOrderID                             string      `json:"ebay_order_id,omitempty"`
-	CartID                                  string      `json:"cart_id,omitempty"`
-	BillingAddress                          Address     `json:"billing_address,omitempty"`
-	IsEmailOptIn                            bool        `json:"is_email_opt_in,omitempty"`
-	CreditCardType                          interface{} `json:"credit_card_type"`
-	OrderSource                             string      `json:"order_source,omitempty"`
-	ChannelID                               int64       `json:"channel_id,omitempty"`
-	ExternalSource                          interface{} `json:"external_source"`
-	ProductResource                         Resource    `json:"products,omitempty"`
+	ID                                      int64            `json:"id,omitempty"`
+	CustomerID                              int64            `json:"customer_id,omitempty"`
+	DateCreated                             primative.BCDate `json:"date_created,omitempty"`
+	DateModified                            primative.BCDate `json:"date_modified,omitempty"`
+	DateShipped                             primative.BCDate `json:"date_shipped,omitempty"`
+	StatusID                                int64            `json:"status_id,omitempty"`
+	Status                                  string           `json:"status,omitempty"`
+	SubtotalExTax                           string           `json:"subtotal_ex_tax,omitempty"`
+	SubtotalIncTax                          string           `json:"subtotal_inc_tax,omitempty"`
+	SubtotalTax                             string           `json:"subtotal_tax,omitempty"`
+	BaseShippingCost                        string           `json:"base_shipping_cost,omitempty"`
+	ShippingCostExTax                       string           `json:"shipping_cost_ex_tax,omitempty"`
+	ShippingCostIncTax                      string           `json:"shipping_cost_inc_tax,omitempty"`
+	ShippingCostTax                         string           `json:"shipping_cost_tax,omitempty"`
+	ShippingCostTaxClassID                  int64            `json:"shipping_cost_tax_class_id,omitempty"`
+	BaseHandlingCost                        string           `json:"base_handling_cost,omitempty"`
+	HandlingCostExTax                       string           `json:"handling_cost_ex_tax,omitempty"`
+	HandlingCostIncTax                      string           `json:"handling_cost_inc_tax,omitempty"`
+	HandlingCostTax                         string           `json:"handling_cost_tax,omitempty"`
+	HandlingCostTaxClassID                  int64            `json:"handling_cost_tax_class_id,omitempty"`
+	BaseWrappingCost                        string           `json:"base_wrapping_cost,omitempty"`
+	WrappingCostExTax                       string           `json:"wrapping_cost_ex_tax,omitempty"`
+	WrappingCostIncTax                      string           `json:"wrapping_cost_inc_tax,omitempty"`
+	WrappingCostTax                         string           `json:"wrapping_cost_tax,omitempty"`
+	WrappingCostTaxClassID                  int64            `json:"wrapping_cost_tax_class_id,omitempty"`
+	TotalExTax                              string           `json:"total_ex_tax,omitempty"`
+	TotalIncTax                             string           `json:"total_inc_tax,omitempty"`
+	TotalTax                                string           `json:"total_tax,omitempty"`
+	ItemsTotal                              int64            `json:"items_total,omitempty"`
+	ItemsShipped                            int64            `json:"items_shipped,omitempty"`
+	PaymentMethod                           string           `json:"payment_method,omitempty"`
+	PaymentProviderID                       string           `json:"payment_provider_id,omitempty"`
+	PaymentStatus                           string           `json:"payment_status,omitempty"`
+	RefundedAmount                          string           `json:"refunded_amount,omitempty"`
+	OrderIsDigital                          bool             `json:"order_is_digital,omitempty"`
+	StoreCreditAmount                       string           `json:"store_credit_amount,omitempty"`
+	GiftCertificateAmount                   string           `json:"gift_certificate_amount,omitempty"`
+	IPAddress                               string           `json:"ip_address,omitempty"`
+	GeoipCountry                            string           `json:"geoip_country,omitempty"`
+	GeoipCountryIso2                        string           `json:"geoip_country_iso2,omitempty"`
+	CurrencyID                              int64            `json:"currency_id,omitempty"`
+	CurrencyCode                            string           `json:"currency_code,omitempty"`
+	CurrencyExchangeRate                    string           `json:"currency_exchange_rate,omitempty"`
+	DefaultCurrencyID                       int64            `json:"default_currency_id,omitempty"`
+	DefaultCurrencyCode                     string           `json:"default_currency_code,omitempty"`
+	StaffNotes                              string           `json:"staff_notes,omitempty"`
+	CustomerMessage                         string           `json:"customer_message,omitempty"`
+	DiscountAmount                          string           `json:"discount_amount,omitempty"`
+	CouponDiscount                          string           `json:"coupon_discount,omitempty"`
+	ShippingAddressCount                    int64            `json:"shipping_address_count,omitempty"`
+	IsDeleted                               bool             `json:"is_deleted,omitempty"`
+	EbayOrderID                             string           `json:"ebay_order_id,omitempty"`
+	CartID                                  string           `json:"cart_id,omitempty"`
+	BillingAddress                          Address          `json:"billing_address,omitempty"`
+	IsEmailOptIn                            bool             `json:"is_email_opt_in,omitempty"`
+	CreditCardType                          interface{}      `json:"credit_card_type"`
+	OrderSource                             string           `json:"order_source,omitempty"`
+	ChannelID                               int64            `json:"channel_id,omitempty"`
+	ExternalSource                          interface{}      `json:"external_source"`
+	ProductResource                         Resource         `json:"products,omitempty"`
 	Products                                []OrderProduct
 	ShippingResource                        Resource `json:"shipping_addresses,omitempty"`
 	ShippingAddresses                       []ShippingAddress
@@ -232,19 +230,4 @@ type OrderProductOption struct {
 type Resource struct {
 	URL      string
 	Resource string
-}
-
-type Client interface {
-	GetBody(url string) ([]byte, error)
-}
-
-// EagerGet - attempts to unmarshal a url into an interface, preferably one intended to unmarshal the json body of that url.
-func (r Resource) EagerGet(s Client, i interface{}) error {
-	url := r.URL
-	body, err := s.GetBody(url)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(body, i)
-	return err
 }

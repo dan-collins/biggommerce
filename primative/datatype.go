@@ -1,10 +1,9 @@
-package model
+package primative
 
 import (
 	"strings"
 	"time"
 )
-
 
 // BCDate struct representing a BigCommerce date resource
 type BCDate struct {

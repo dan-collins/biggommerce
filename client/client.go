@@ -1,4 +1,4 @@
-package biggommerce
+package client
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func NewClient(authToken, authClient, storeKey string) *BCClient {
 func (s *BCClient) SetBaseURL(url string) {
 	s.BaseURL = url
 }
-func (s *BCClient) doRequest(req *http.Request) ([]byte, error) {
+func (s *BCClient) DoRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
 	req.Header.Add("x-auth-token", s.AuthToken)
@@ -51,11 +51,11 @@ func (s *BCClient) doRequest(req *http.Request) ([]byte, error) {
 }
 
 // GetBody - gets the request body of the url
-func (s BCClient) GetBody(url string) (body []byte, err error) {
+func (s *BCClient) GetBody(url string) (body []byte, err error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return
 	}
-	body, err = s.doRequest(req)
+	body, err = s.DoRequest(req)
 	return
 }

@@ -1,4 +1,4 @@
-package biggommerce
+package order
 
 import (
 	"encoding/json"
@@ -7,22 +7,33 @@ import (
 	"sort"
 	"time"
 
+	"github.com/dan-collins/biggommerce/client"
 	"github.com/google/go-querystring/query"
-
-	. "github.com/dan-collins/biggommerce/model"
 	"golang.org/x/sync/errgroup"
 )
 
+type Client struct {
+	client.BCClient
+}
+
+//NewClient create a new client wrapper based on BC connection details
+func NewClient(authToken, authClient, storeKey string) *Client {
+	bcClient := client.NewClient(authToken, authClient, storeKey)
+	orderClient := Client{}
+	orderClient.BCClient = *bcClient
+	return &orderClient
+}
+
 // GetProductDetail - Will attempt to concurrently fill the order slice elements with their respective products from the BC api
-func (s *BCClient) GetProductDetail(os []Order) (err error) {
+func (s *Client) GetProductDetail(os []Order) (err error) {
 	var eg errgroup.Group
 	sem := make(chan bool, 20)
 	for i := range os {
-		i := i
+		j := i
 		eg.Go(func() error {
 			sem <- true
 			defer func() { <-sem }()
-			return os[i].ProductResource.EagerGet(s, &os[i].Products)
+			return os[j].ProductResource.EagerGet(s, &os[j].Products)
 		})
 	}
 	err = eg.Wait()
@@ -30,7 +41,7 @@ func (s *BCClient) GetProductDetail(os []Order) (err error) {
 }
 
 // GetOrderCount Return an OrderCount struct containing statuses and counts
-func (s *BCClient) GetOrderCount() (*OrderCount, error) {
+func (s *Client) GetOrderCount() (*OrderCount, error) {
 	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/count", s.StoreKey)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -38,7 +49,7 @@ func (s *BCClient) GetOrderCount() (*OrderCount, error) {
 		return nil, err
 	}
 
-	res, err := s.doRequest(req)
+	res, err := s.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +66,7 @@ func (s *BCClient) GetOrderCount() (*OrderCount, error) {
 }
 
 // GetShipments get shipments from the orders returned by the query
-func (s *BCClient) GetShipments(oq OrderQuery) ([]Shipment, error) {
+func (s *Client) GetShipments(oq OrderQuery) ([]Shipment, error) {
 	os, err := s.GetOrderQuery(oq)
 	if err != nil {
 		return nil, err
@@ -73,7 +84,7 @@ func (s *BCClient) GetShipments(oq OrderQuery) ([]Shipment, error) {
 			if err != nil {
 				return err
 			}
-			res, err := s.doRequest(req)
+			res, err := s.DoRequest(req)
 			if err != nil {
 				return err
 			}
@@ -152,7 +163,7 @@ func (q OrderQuery) GetRawQuery() (raw string, err error) {
 }
 
 // GetOrderQuery Return a slice of Order structs based on passed in query object
-func (s *BCClient) GetOrderQuery(oq OrderQuery) (*[]Order, error) {
+func (s *Client) GetOrderQuery(oq OrderQuery) (*[]Order, error) {
 	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/", s.StoreKey)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -164,7 +175,7 @@ func (s *BCClient) GetOrderQuery(oq OrderQuery) (*[]Order, error) {
 		return nil, err
 	}
 
-	res, err := s.doRequest(req)
+	res, err := s.DoRequest(req)
 	if err != nil {
 		return nil, err
 	}
@@ -181,12 +192,12 @@ func (s *BCClient) GetOrderQuery(oq OrderQuery) (*[]Order, error) {
 }
 
 // GetOrders Return a slice of Order structs based on passed in status
-func (s *BCClient) GetOrders(status int) (*[]Order, error) {
+func (s *Client) GetOrders(status int) (*[]Order, error) {
 	return s.GetOrderQuery(OrderQuery{StatusID: status})
 }
 
 // GetOrdersAndProducts Return a slice of Order structs based on passed in status
-func (s *BCClient) GetOrdersAndProducts(status int) (*[]Order, error) {
+func (s *Client) GetOrdersAndProducts(status int) (*[]Order, error) {
 	orders, err := s.GetOrders(status)
 	if err != nil {
 		return nil, err
@@ -197,7 +208,7 @@ func (s *BCClient) GetOrdersAndProducts(status int) (*[]Order, error) {
 }
 
 // GetOrderByID - return a single order with Shipping Address Populated.
-func (s *BCClient) GetOrderByID(orderID string) (order Order, err error) {
+func (s *Client) GetOrderByID(orderID string) (order Order, err error) {
 	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/%s", s.StoreKey, orderID)
 
 	body, err := s.GetBody(url)
@@ -214,4 +225,15 @@ func (s *BCClient) GetOrderByID(orderID string) (order Order, err error) {
 	}
 	err = order.ProductResource.EagerGet(s, &order.Products)
 	return
+}
+
+// EagerGet - attempts to unmarshal a url into an interface, preferably one intended to unmarshal the json body of that url.
+func (r Resource) EagerGet(s *Client, i interface{}) error {
+	url := r.URL
+	body, err := s.GetBody(url)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, i)
+	return err
 }

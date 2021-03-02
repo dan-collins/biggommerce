@@ -12,11 +12,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Client is a wrapper struct that embeds the BCClient from the client package. It handles connection to the BigCommerce API
 type Client struct {
 	client.BCClient
 }
 
-//NewClient create a new client wrapper based on BC connection details
+//NewClient will create a new client wrapper based on BC connection details
 func NewClient(authToken, authClient, storeKey string) *Client {
 	bcClient := client.NewClient(authToken, authClient, storeKey)
 	orderClient := Client{}

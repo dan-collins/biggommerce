@@ -176,13 +176,13 @@ Project Link: [https://github.com/dan-collins/biggommerce](https://github.com/da
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/dan-collins/biggommerce.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/dan-collins/biggommerce.svg?logo=github&style=for-the-badge
 [contributors-url]: https://github.com/dan-collins/biggommerce/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/dan-collins/biggommerce.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/dan-collins/biggommerce.svg?logo=github&style=for-the-badge
 [forks-url]: https://github.com/dan-collins/biggommerce/network/members
-[stars-shield]: https://img.shields.io/github/stars/dan-collins/biggommerce.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/dan-collins/biggommerce.svg?logo=github&style=for-the-badge
 [stars-url]: https://github.com/dan-collins/biggommerce/stargazers
-[issues-shield]: https://img.shields.io/github/issues/dan-collins/biggommerce.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/dan-collins/biggommerce.svg?logo=github&style=for-the-badge
 [issues-url]: https://github.com/dan-collins/biggommerce/issues
 [license-shield]: https://img.shields.io/github/license/dan-collins/biggommerce.svg?style=for-the-badge
 [license-url]: https://github.com/dan-collins/biggommerce/blob/master/LICENSE.txt

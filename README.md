@@ -41,7 +41,7 @@
   <p align="center">
     This is a library for consuming the Big Commerce API in go. Handles things like auth and [un]marshalling to hopefully make things easier.
     <br />
-    <a href="https://github.com/dan-collins/biggommerce"><strong>Explore the docs »</strong></a>
+    <a href="https://pkg.go.dev/github.com/dan-collins/biggommerce#section-directories"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/dan-collins/biggommerce">View Demo</a>
@@ -88,6 +88,8 @@
 If you want to interact with the BigCommerce rest API in a golang project, this library should
 help you out. The plan is to eventually build it out for all endpoints/resources but for now most of
 the [orders](https://developer.bigcommerce.com/api-reference/store-management/orders/) endpoint is addressed.
+
+Module is still considered "unstable" (v0.x.x) until I have a chance to use this in a production app.
 
 ### Built With
 
@@ -174,15 +176,15 @@ Project Link: [https://github.com/dan-collins/biggommerce](https://github.com/da
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/dan-collins/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/dan-collins/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/dan-collins/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/dan-collins/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/dan-collins/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/dan-collins/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/dan-collins/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/dan-collins/repo/issues
-[license-shield]: https://img.shields.io/github/license/dan-collins/repo.svg?style=for-the-badge
-[license-url]: https://github.com/dan-collins/repo/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/dan-collins/biggommerce.svg?style=for-the-badge
+[contributors-url]: https://github.com/dan-collins/biggommerce/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/dan-collins/biggommerce.svg?style=for-the-badge
+[forks-url]: https://github.com/dan-collins/biggommerce/network/members
+[stars-shield]: https://img.shields.io/github/stars/dan-collins/biggommerce.svg?style=for-the-badge
+[stars-url]: https://github.com/dan-collins/biggommerce/stargazers
+[issues-shield]: https://img.shields.io/github/issues/dan-collins/biggommerce.svg?style=for-the-badge
+[issues-url]: https://github.com/dan-collins/biggommerce/issues
+[license-shield]: https://img.shields.io/github/license/dan-collins/biggommerce.svg?style=for-the-badge
+[license-url]: https://github.com/dan-collins/biggommerce/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/dan-collins
+[linkedin-url]: https://www.linkedin.com/in/dan-collins-8805b111/

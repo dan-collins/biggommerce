@@ -44,8 +44,6 @@
     <a href="https://pkg.go.dev/github.com/dan-collins/biggommerce#section-directories"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/dan-collins/biggommerce">View Demo</a>
-    ·
     <a href="https://github.com/dan-collins/biggommerce/issues">Report Bug</a>
     ·
     <a href="https://github.com/dan-collins/biggommerce/issues">Request Feature</a>

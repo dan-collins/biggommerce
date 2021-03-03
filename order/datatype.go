@@ -21,7 +21,7 @@ type OrderCount struct {
 
 type AppliedDiscount struct {
 	ID     string      `json:"id,omitempty"`
-	Amount string      `json:"amount,omitempty"`
+	Amount float64     `json:"amount,string,omitempty"`
 	Name   string      `json:"name,omitempty"`
 	Code   interface{} `json:"code"`
 	Target string      `json:"target,omitempty"`
@@ -104,36 +104,36 @@ type Order struct {
 	DateShipped                             primative.BCDate `json:"date_shipped,omitempty"`
 	StatusID                                int64            `json:"status_id,omitempty"`
 	Status                                  string           `json:"status,omitempty"`
-	SubtotalExTax                           string           `json:"subtotal_ex_tax,omitempty"`
-	SubtotalIncTax                          string           `json:"subtotal_inc_tax,omitempty"`
-	SubtotalTax                             string           `json:"subtotal_tax,omitempty"`
-	BaseShippingCost                        string           `json:"base_shipping_cost,omitempty"`
-	ShippingCostExTax                       string           `json:"shipping_cost_ex_tax,omitempty"`
-	ShippingCostIncTax                      string           `json:"shipping_cost_inc_tax,omitempty"`
-	ShippingCostTax                         string           `json:"shipping_cost_tax,omitempty"`
+	SubtotalExTax                           float64          `json:"subtotal_ex_tax,string"`
+	SubtotalIncTax                          float64          `json:"subtotal_inc_tax,string"`
+	SubtotalTax                             float64          `json:"subtotal_tax,string"`
+	BaseShippingCost                        float64          `json:"base_shipping_cost,string"`
+	ShippingCostExTax                       float64          `json:"shipping_cost_ex_tax,string"`
+	ShippingCostIncTax                      float64          `json:"shipping_cost_inc_tax,string"`
+	ShippingCostTax                         float64          `json:"shipping_cost_tax,string"`
 	ShippingCostTaxClassID                  int64            `json:"shipping_cost_tax_class_id,omitempty"`
-	BaseHandlingCost                        string           `json:"base_handling_cost,omitempty"`
-	HandlingCostExTax                       string           `json:"handling_cost_ex_tax,omitempty"`
-	HandlingCostIncTax                      string           `json:"handling_cost_inc_tax,omitempty"`
-	HandlingCostTax                         string           `json:"handling_cost_tax,omitempty"`
+	BaseHandlingCost                        float64          `json:"base_handling_cost,string"`
+	HandlingCostExTax                       float64          `json:"handling_cost_ex_tax,string"`
+	HandlingCostIncTax                      float64          `json:"handling_cost_inc_tax,string"`
+	HandlingCostTax                         float64          `json:"handling_cost_tax,string"`
 	HandlingCostTaxClassID                  int64            `json:"handling_cost_tax_class_id,omitempty"`
-	BaseWrappingCost                        string           `json:"base_wrapping_cost,omitempty"`
-	WrappingCostExTax                       string           `json:"wrapping_cost_ex_tax,omitempty"`
-	WrappingCostIncTax                      string           `json:"wrapping_cost_inc_tax,omitempty"`
-	WrappingCostTax                         string           `json:"wrapping_cost_tax,omitempty"`
-	WrappingCostTaxClassID                  int64            `json:"wrapping_cost_tax_class_id,omitempty"`
-	TotalExTax                              string           `json:"total_ex_tax,omitempty"`
-	TotalIncTax                             string           `json:"total_inc_tax,omitempty"`
-	TotalTax                                string           `json:"total_tax,omitempty"`
+	BaseWrappingCost                        float64          `json:"base_wrapping_cost,string"`
+	WrappingCostExTax                       float64          `json:"wrapping_cost_ex_tax,string"`
+	WrappingCostIncTax                      float64          `json:"wrapping_cost_inc_tax,string"`
+	WrappingCostTax                         float64          `json:"wrapping_cost_tax,string"`
+	WrappingCostTaxClassID                  int64            `json:"wrapping_cost_tax_class_id,string"`
+	TotalExTax                              float64          `json:"total_ex_tax,string"`
+	TotalIncTax                             float64          `json:"total_inc_tax,string"`
+	TotalTax                                float64          `json:"total_tax,string"`
 	ItemsTotal                              int64            `json:"items_total,omitempty"`
 	ItemsShipped                            int64            `json:"items_shipped,omitempty"`
 	PaymentMethod                           string           `json:"payment_method,omitempty"`
 	PaymentProviderID                       string           `json:"payment_provider_id,omitempty"`
 	PaymentStatus                           string           `json:"payment_status,omitempty"`
-	RefundedAmount                          string           `json:"refunded_amount,omitempty"`
+	RefundedAmount                          float64          `json:"refunded_amount,string"`
 	OrderIsDigital                          bool             `json:"order_is_digital,omitempty"`
-	StoreCreditAmount                       string           `json:"store_credit_amount,omitempty"`
-	GiftCertificateAmount                   string           `json:"gift_certificate_amount,omitempty"`
+	StoreCreditAmount                       float64          `json:"store_credit_amount,string"`
+	GiftCertificateAmount                   float64          `json:"gift_certificate_amount,string"`
 	IPAddress                               string           `json:"ip_address,omitempty"`
 	GeoipCountry                            string           `json:"geoip_country,omitempty"`
 	GeoipCountryIso2                        string           `json:"geoip_country_iso2,omitempty"`
@@ -144,8 +144,8 @@ type Order struct {
 	DefaultCurrencyCode                     string           `json:"default_currency_code,omitempty"`
 	StaffNotes                              string           `json:"staff_notes,omitempty"`
 	CustomerMessage                         string           `json:"customer_message,omitempty"`
-	DiscountAmount                          string           `json:"discount_amount,omitempty"`
-	CouponDiscount                          string           `json:"coupon_discount,omitempty"`
+	DiscountAmount                          float64          `json:"discount_amount,string"`
+	CouponDiscount                          float64          `json:"coupon_discount,string"`
 	ShippingAddressCount                    int64            `json:"shipping_address_count,omitempty"`
 	IsDeleted                               bool             `json:"is_deleted,omitempty"`
 	EbayOrderID                             string           `json:"ebay_order_id,omitempty"`
@@ -179,32 +179,32 @@ type OrderProduct struct {
 	Sku                  string            `json:"sku,omitempty"`
 	Upc                  string            `json:"upc,omitempty"`
 	Type                 string            `json:"type,omitempty"`
-	BasePrice            string            `json:"base_price,omitempty"`
-	PriceExTax           string            `json:"price_ex_tax,omitempty"`
-	PriceIncTax          string            `json:"price_inc_tax,omitempty"`
-	PriceTax             string            `json:"price_tax,omitempty"`
-	BaseTotal            string            `json:"base_total,omitempty"`
-	TotalExTax           string            `json:"total_ex_tax,omitempty"`
-	TotalIncTax          string            `json:"total_inc_tax,omitempty"`
-	TotalTax             string            `json:"total_tax,omitempty"`
-	Weight               string            `json:"weight,omitempty"`
+	BasePrice            float64           `json:"base_price,string"`
+	PriceExTax           float64           `json:"price_ex_tax,string"`
+	PriceIncTax          float64           `json:"price_inc_tax,string"`
+	PriceTax             float64           `json:"price_tax,string"`
+	BaseTotal            float64           `json:"base_total,string"`
+	TotalExTax           float64           `json:"total_ex_tax,string"`
+	TotalIncTax          float64           `json:"total_inc_tax,string"`
+	TotalTax             float64           `json:"total_tax,string"`
+	Weight               float64           `json:"weight,string"`
 	Quantity             int64             `json:"quantity,omitempty"`
-	BaseCostPrice        string            `json:"base_cost_price,omitempty"`
-	CostPriceIncTax      string            `json:"cost_price_inc_tax,omitempty"`
-	CostPriceExTax       string            `json:"cost_price_ex_tax,omitempty"`
-	CostPriceTax         string            `json:"cost_price_tax,omitempty"`
+	BaseCostPrice        float64           `json:"base_cost_price,string"`
+	CostPriceIncTax      float64           `json:"cost_price_inc_tax,string"`
+	CostPriceExTax       float64           `json:"cost_price_ex_tax,string"`
+	CostPriceTax         float64           `json:"cost_price_tax,string"`
 	IsRefunded           bool              `json:"is_refunded,omitempty"`
 	QuantityRefunded     int64             `json:"quantity_refunded,omitempty"`
-	RefundAmount         string            `json:"refund_amount,omitempty"`
+	RefundAmount         float64           `json:"refund_amount,string"`
 	ReturnID             int64             `json:"return_id,omitempty"`
 	WrappingName         string            `json:"wrapping_name,omitempty"`
-	BaseWrappingCost     string            `json:"base_wrapping_cost,omitempty"`
-	WrappingCostExTax    string            `json:"wrapping_cost_ex_tax,omitempty"`
-	WrappingCostIncTax   string            `json:"wrapping_cost_inc_tax,omitempty"`
-	WrappingCostTax      string            `json:"wrapping_cost_tax,omitempty"`
+	BaseWrappingCost     float64           `json:"base_wrapping_cost,string"`
+	WrappingCostExTax    float64           `json:"wrapping_cost_ex_tax,string"`
+	WrappingCostIncTax   float64           `json:"wrapping_cost_inc_tax,string"`
+	WrappingCostTax      float64           `json:"wrapping_cost_tax,string"`
 	WrappingMessage      string            `json:"wrapping_message,omitempty"`
 	QuantityShipped      int64             `json:"quantity_shipped,omitempty"`
-	FixedShippingCost    string            `json:"fixed_shipping_cost,omitempty"`
+	FixedShippingCost    float64           `json:"fixed_shipping_cost,string"`
 	EbayItemID           string            `json:"ebay_item_id,omitempty"`
 	EbayTransactionID    string            `json:"ebay_transaction_id,omitempty"`
 	OptionSetID          int64             `json:"option_set_id,omitempty"`

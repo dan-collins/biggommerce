@@ -121,7 +121,7 @@ type Order struct {
 	WrappingCostExTax                       float64          `json:"wrapping_cost_ex_tax,string"`
 	WrappingCostIncTax                      float64          `json:"wrapping_cost_inc_tax,string"`
 	WrappingCostTax                         float64          `json:"wrapping_cost_tax,string"`
-	WrappingCostTaxClassID                  int64            `json:"wrapping_cost_tax_class_id,string"`
+	WrappingCostTaxClassID                  int64            `json:"wrapping_cost_tax_class_id,omitempty"`
 	TotalExTax                              float64          `json:"total_ex_tax,string"`
 	TotalIncTax                             float64          `json:"total_inc_tax,string"`
 	TotalTax                                float64          `json:"total_tax,string"`

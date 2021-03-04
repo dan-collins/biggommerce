@@ -41,6 +41,22 @@ func (s *Client) GetProductDetail(os []Order) (err error) {
 	return
 }
 
+// GetShippingAddressesForOrders - Will attempt to concurrently fill the order slice elements with their respective shipping addresses from the BC api
+func (s *Client) GetShippingAddressesForOrders(os []Order) (err error) {
+	var eg errgroup.Group
+	sem := make(chan bool, 20)
+	for i := range os {
+		j := i
+		eg.Go(func() error {
+			sem <- true
+			defer func() { <-sem }()
+			return os[j].ShippingResource.EagerGet(s, &os[j].ShippingAddresses)
+		})
+	}
+	err = eg.Wait()
+	return
+}
+
 // GetOrderCount Return an OrderCount struct containing statuses and counts
 func (s *Client) GetOrderCount() (*OrderCount, error) {
 	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/count", s.StoreKey)
@@ -228,7 +244,7 @@ func (s *Client) GetOrderByID(orderID string) (order Order, err error) {
 	return
 }
 
-// EagerGet - attempts to unmarshal a url into an interface, preferably one intended to unmarshal the json body of that url.
+// EagerGet - attempts to unmarshal a resource url into an interface, preferably one intended to unmarshal the json body of that url.
 func (r Resource) EagerGet(s *Client, i interface{}) error {
 	url := r.URL
 	body, err := s.GetBody(url)

@@ -2,138 +2,94 @@ package order
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
-	"sort"
 	"time"
 
-	"github.com/dan-collins/biggommerce/client"
-	"github.com/google/go-querystring/query"
-	"golang.org/x/sync/errgroup"
+	"github.com/dan-collins/biggommerce/primative"
 )
 
-// Client is a wrapper struct that embeds the BCClient from the client package. It handles connection to the BigCommerce API
-type Client struct {
-	client.BCClient
+// Order is a struct that represents the return body of BigCommerce GET /orders
+type Order struct {
+	ID                                      int64            `json:"id,omitempty"`
+	CustomerID                              int64            `json:"customer_id,omitempty"`
+	DateCreated                             primative.BCDate `json:"date_created,omitempty"`
+	DateModified                            primative.BCDate `json:"date_modified,omitempty"`
+	DateShipped                             primative.BCDate `json:"date_shipped,omitempty"`
+	StatusID                                int64            `json:"status_id,omitempty"`
+	Status                                  string           `json:"status,omitempty"`
+	SubtotalExTax                           float64          `json:"subtotal_ex_tax,string"`
+	SubtotalIncTax                          float64          `json:"subtotal_inc_tax,string"`
+	SubtotalTax                             float64          `json:"subtotal_tax,string"`
+	BaseShippingCost                        float64          `json:"base_shipping_cost,string"`
+	ShippingCostExTax                       float64          `json:"shipping_cost_ex_tax,string"`
+	ShippingCostIncTax                      float64          `json:"shipping_cost_inc_tax,string"`
+	ShippingCostTax                         float64          `json:"shipping_cost_tax,string"`
+	ShippingCostTaxClassID                  int64            `json:"shipping_cost_tax_class_id,omitempty"`
+	BaseHandlingCost                        float64          `json:"base_handling_cost,string"`
+	HandlingCostExTax                       float64          `json:"handling_cost_ex_tax,string"`
+	HandlingCostIncTax                      float64          `json:"handling_cost_inc_tax,string"`
+	HandlingCostTax                         float64          `json:"handling_cost_tax,string"`
+	HandlingCostTaxClassID                  int64            `json:"handling_cost_tax_class_id,omitempty"`
+	BaseWrappingCost                        float64          `json:"base_wrapping_cost,string"`
+	WrappingCostExTax                       float64          `json:"wrapping_cost_ex_tax,string"`
+	WrappingCostIncTax                      float64          `json:"wrapping_cost_inc_tax,string"`
+	WrappingCostTax                         float64          `json:"wrapping_cost_tax,string"`
+	WrappingCostTaxClassID                  int64            `json:"wrapping_cost_tax_class_id,omitempty"`
+	TotalExTax                              float64          `json:"total_ex_tax,string"`
+	TotalIncTax                             float64          `json:"total_inc_tax,string"`
+	TotalTax                                float64          `json:"total_tax,string"`
+	ItemsTotal                              int64            `json:"items_total,omitempty"`
+	ItemsShipped                            int64            `json:"items_shipped,omitempty"`
+	PaymentMethod                           string           `json:"payment_method,omitempty"`
+	PaymentProviderID                       string           `json:"payment_provider_id,omitempty"`
+	PaymentStatus                           string           `json:"payment_status,omitempty"`
+	RefundedAmount                          float64          `json:"refunded_amount,string"`
+	OrderIsDigital                          bool             `json:"order_is_digital,omitempty"`
+	StoreCreditAmount                       float64          `json:"store_credit_amount,string"`
+	GiftCertificateAmount                   float64          `json:"gift_certificate_amount,string"`
+	IPAddress                               string           `json:"ip_address,omitempty"`
+	GeoipCountry                            string           `json:"geoip_country,omitempty"`
+	GeoipCountryIso2                        string           `json:"geoip_country_iso2,omitempty"`
+	CurrencyID                              int64            `json:"currency_id,omitempty"`
+	CurrencyCode                            string           `json:"currency_code,omitempty"`
+	CurrencyExchangeRate                    string           `json:"currency_exchange_rate,omitempty"`
+	DefaultCurrencyID                       int64            `json:"default_currency_id,omitempty"`
+	DefaultCurrencyCode                     string           `json:"default_currency_code,omitempty"`
+	StaffNotes                              string           `json:"staff_notes,omitempty"`
+	CustomerMessage                         string           `json:"customer_message,omitempty"`
+	DiscountAmount                          float64          `json:"discount_amount,string"`
+	CouponDiscount                          float64          `json:"coupon_discount,string"`
+	ShippingAddressCount                    int64            `json:"shipping_address_count,omitempty"`
+	IsDeleted                               bool             `json:"is_deleted,omitempty"`
+	EbayOrderID                             string           `json:"ebay_order_id,omitempty"`
+	CartID                                  string           `json:"cart_id,omitempty"`
+	BillingAddress                          Address          `json:"billing_address,omitempty"`
+	IsEmailOptIn                            bool             `json:"is_email_opt_in,omitempty"`
+	CreditCardType                          interface{}      `json:"credit_card_type"`
+	OrderSource                             string           `json:"order_source,omitempty"`
+	ChannelID                               int64            `json:"channel_id,omitempty"`
+	ExternalSource                          interface{}      `json:"external_source"`
+	ProductResource                         Resource         `json:"products,omitempty"`
+	Products                                []OrderProduct
+	ShippingResource                        Resource `json:"shipping_addresses,omitempty"`
+	ShippingAddresses                       []ShippingAddress
+	CouponResource                          Resource `json:"coupons,omitempty"`
+	Coupons                                 []Coupon
+	ExternalID                              interface{} `json:"external_id"`
+	ExternalMerchantID                      interface{} `json:"external_merchant_id"`
+	TaxProviderID                           string      `json:"tax_provider_id,omitempty"`
+	StoreDefaultCurrencyCode                string      `json:"store_default_currency_code,omitempty"`
+	StoreDefaultToTransactionalExchangeRate string      `json:"store_default_to_transactional_exchange_rate,omitempty"`
+	CustomStatus                            string      `json:"custom_status,omitempty"`
 }
 
-//NewClient will create a new client wrapper based on BC connection details
-func NewClient(authToken, authClient, storeKey string) *Client {
-	bcClient := client.NewClient(authToken, authClient, storeKey)
-	orderClient := Client{}
-	orderClient.BCClient = *bcClient
-	return &orderClient
+// Resource is general struct for resource url and type found in many returned objects from bigcommerce
+type Resource struct {
+	URL      string
+	Resource string
 }
 
-// GetProductDetail - Will attempt to concurrently fill the order slice elements with their respective products from the BC api
-func (s *Client) GetProductDetail(os []Order) (err error) {
-	var eg errgroup.Group
-	sem := make(chan bool, 20)
-	for i := range os {
-		j := i
-		eg.Go(func() error {
-			sem <- true
-			defer func() { <-sem }()
-			return os[j].ProductResource.EagerGet(s, &os[j].Products)
-		})
-	}
-	err = eg.Wait()
-	return
-}
-
-// GetShippingAddressesForOrders - Will attempt to concurrently fill the order slice elements with their respective shipping addresses from the BC api
-func (s *Client) GetShippingAddressesForOrders(os []Order) (err error) {
-	var eg errgroup.Group
-	sem := make(chan bool, 20)
-	for i := range os {
-		j := i
-		eg.Go(func() error {
-			sem <- true
-			defer func() { <-sem }()
-			return os[j].ShippingResource.EagerGet(s, &os[j].ShippingAddresses)
-		})
-	}
-	err = eg.Wait()
-	return
-}
-
-// GetOrderCount Return an OrderCount struct containing statuses and counts
-func (s *Client) GetOrderCount() (*OrderCount, error) {
-	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/count", s.StoreKey)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := s.DoRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	var data OrderCount
-	err = json.Unmarshal(res, &data)
-	if err != nil {
-		return nil, err
-	}
-	sort.Slice(data.StatusCounts, func(i, j int) bool {
-		return data.StatusCounts[i].SortOrder < data.StatusCounts[j].SortOrder
-	})
-	return &data, nil
-}
-
-// GetShipments get shipments from the orders returned by the query
-func (s *Client) GetShipments(oq OrderQuery) ([]Shipment, error) {
-	os, err := s.GetOrderQuery(oq)
-	if err != nil {
-		return nil, err
-	}
-	var eg errgroup.Group
-	sem := make(chan bool, 20)
-	shipChan := make(chan Shipment, 3)
-	for _, o := range *os {
-		o := o
-		eg.Go(func() error {
-			sem <- true
-			defer func() { <-sem }()
-			url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/%d/shipments", s.StoreKey, o.ID)
-			req, err := http.NewRequest("GET", url, nil)
-			if err != nil {
-				return err
-			}
-			res, err := s.DoRequest(req)
-			if err != nil {
-				return err
-			}
-
-			var data []Shipment
-			err = json.Unmarshal(res, &data)
-			if err != nil {
-				return err
-			}
-
-			for _, ship := range data {
-				shipChan <- ship
-			}
-			return nil
-		})
-	}
-
-	shipments := make([]Shipment, 0)
-	go func() {
-		for i := range shipChan {
-			shipments = append(shipments, i)
-		}
-	}()
-	err = eg.Wait()
-	if err != nil {
-		return nil, err
-	}
-	return shipments, nil
-}
-
-// OrderQuery struct to handle orders endpoint search query params
-type OrderQuery struct {
+// Query struct to handle orders endpoint search query params
+type Query struct {
 	MinID              int       `url:"min_id,omitempty"`
 	MaxID              int       `url:"max_id,omitempty"`
 	MinTotal           float64   `url:"min_total,omitempty"`
@@ -155,93 +111,6 @@ type OrderQuery struct {
 	MaxDateCreatedRaw  string    `url:"max_date_created,omitempty"`
 	MinDateModifiedRaw string    `url:"min_date_modified,omitempty"`
 	MaxDateModifiedRaw string    `url:"max_date_modified,omitempty"`
-}
-
-// GetRawQuery gets the struct in query string form
-func (q OrderQuery) GetRawQuery() (raw string, err error) {
-	if !q.MinDateCreated.IsZero() {
-		q.MinDateCreatedRaw = q.MinDateCreated.Format(time.RFC1123Z)
-	}
-	if !q.MaxDateCreated.IsZero() {
-		q.MaxDateCreatedRaw = q.MaxDateCreated.Format(time.RFC1123Z)
-	}
-	if !q.MinDateModified.IsZero() {
-		q.MinDateModifiedRaw = q.MinDateModified.Format(time.RFC1123Z)
-	}
-	if !q.MaxDateModified.IsZero() {
-		q.MaxDateModifiedRaw = q.MaxDateModified.Format(time.RFC1123Z)
-	}
-	v, err := query.Values(q)
-	if err != nil {
-		return "", err
-	}
-	raw = v.Encode()
-	return
-}
-
-// GetOrderQuery Return a slice of Order structs based on passed in query object
-func (s *Client) GetOrderQuery(oq OrderQuery) (*[]Order, error) {
-	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/", s.StoreKey)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.URL.RawQuery, err = oq.GetRawQuery()
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := s.DoRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
-	var data []Order
-	err = json.Unmarshal(res, &data)
-	if err != nil {
-		return nil, err
-	}
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].ID < data[j].ID
-	})
-	return &data, nil
-}
-
-// GetOrders Return a slice of Order structs based on passed in status
-func (s *Client) GetOrders(status int) (*[]Order, error) {
-	return s.GetOrderQuery(OrderQuery{StatusID: status})
-}
-
-// GetOrdersAndProducts Return a slice of Order structs based on passed in status
-func (s *Client) GetOrdersAndProducts(status int) (*[]Order, error) {
-	orders, err := s.GetOrders(status)
-	if err != nil {
-		return nil, err
-	}
-	err = s.GetProductDetail(*orders)
-
-	return orders, err
-}
-
-// GetOrderByID - return a single order with Shipping Address Populated.
-func (s *Client) GetOrderByID(orderID string) (order Order, err error) {
-	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/%s", s.StoreKey, orderID)
-
-	body, err := s.GetBody(url)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(body, &order)
-	if err != nil {
-		return
-	}
-	err = order.ShippingResource.EagerGet(s, &order.ShippingAddresses)
-	if err != nil {
-		return
-	}
-	err = order.ProductResource.EagerGet(s, &order.Products)
-	return
 }
 
 // EagerGet - attempts to unmarshal a resource url into an interface, preferably one intended to unmarshal the json body of that url.

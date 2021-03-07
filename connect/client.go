@@ -1,4 +1,4 @@
-package client
+package connect
 
 import (
 	"fmt"
@@ -25,9 +25,14 @@ func NewClient(authToken, authClient, storeKey string) *BCClient {
 		BaseURL:    baseBCURL,
 	}
 }
+
+// SetBaseURL will override the default (https://api.bigcommerce.com/stores/) base url of the client to the string passed in
 func (s *BCClient) SetBaseURL(url string) {
 	s.BaseURL = url
 }
+
+// DoRequest will call out to bigcommerce API for the passed in request, this is mostly used internal to the
+// package but can be used to expand on the library
 func (s *BCClient) DoRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
@@ -44,7 +49,7 @@ func (s *BCClient) DoRequest(req *http.Request) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if 200 != resp.StatusCode {
+	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("%s", body)
 	}
 	return body, nil

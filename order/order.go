@@ -120,6 +120,8 @@ func (r Resource) EagerGet(s *Client, i interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(body, i)
+	if len(body) > 0 {
+		err = json.Unmarshal(body, i)
+	}
 	return err
 }

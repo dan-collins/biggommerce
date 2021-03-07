@@ -122,7 +122,55 @@ To use the module in your project follow these simple steps.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Examples coming soon...
+```go
+package main
+
+import (
+	"fmt"
+	// Make sure you import the package you want to access
+	bgOrder "github.com/dan-collins/biggommerce/order"
+	"time"
+)
+
+func main() {
+	orders := GetOrders()
+	fmt.Println(orders)
+}
+
+func GetOrders() []bgOrder.Order {
+	// Fill in your BigCommerce details here
+	bcToken := "{YOUR-TOKEN}"
+	bgClient := "{YOUR-CLIENT-ID}"
+	bcStoreKey := "{YOUR-STORE-KEY}"
+
+	// Create the client
+	client := bgOrder.NewClient(bcToken, bgClient, bcStoreKey)
+
+	// Set up your query criteria 
+	// (see https://pkg.go.dev/github.com/dan-collins/biggommerce@v0.2.0/order#OrderQuery for details)
+	ny, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		panic(err)
+	}
+	// Just getting a date range for beginning and end of a day
+	sDate := time.Date(2021, 3, 3, 0, 0, 0, 0, ny)
+	eDate := time.Date(2021, 3, 3, 23, 59, 59, 0, ny)
+	// I only want orders with status id of 8
+	status := 8
+
+	// Setup the query to use based on the criteria
+	orderQuery := bgOrder.Query{StatusID: status, MinDateModified: sDate, MaxDateModified: eDate}
+	
+	// Get back the data you care about, Hydrated will include all resource linked objects on each order returned
+	orders, err := client.GetHydratedOrders(orderQuery)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		panic(err)
+	}
+	return *orders
+}
+```
 
 _For method documentation, please refer to the [GoDoc](https://pkg.go.dev/github.com/dan-collins/biggommerce#section-directories)_
 

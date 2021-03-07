@@ -29,6 +29,7 @@
 
 
 
+
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -147,7 +148,7 @@ func GetOrders() []bgOrder.Order {
 	client := bgOrder.NewClient(bcToken, bgClient, bcStoreKey)
 
 	// Set up your query criteria 
-	// (see https://pkg.go.dev/github.com/dan-collins/biggommerce@v0.2.0/order#OrderQuery for details)
+	// (see https://pkg.go.dev/github.com/dan-collins/biggommerce/order#Query for details)
 	ny, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		panic(err)

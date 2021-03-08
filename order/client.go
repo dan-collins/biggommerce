@@ -15,7 +15,7 @@ type Client struct {
 	connect.BCClient
 }
 
-//NewClient will create a new client wrapper based on BC connection details
+//NewClient will create a new order client wrapper based on BC connection details
 func NewClient(authToken, authClient, storeKey string) *Client {
 	bcClient := connect.NewClient(authToken, authClient, storeKey)
 	orderClient := Client{}
@@ -71,7 +71,7 @@ func (s *Client) GetCouponsForOrders(os []Order) (err error) {
 	return
 }
 
-// GetOrderCount Return an OrderCount struct containing statuses and counts
+// GetOrderCount will return an OrderCount struct containing statuses and counts
 func (s *Client) GetOrderCount() (*OrderCount, error) {
 	var data OrderCount
 	err := s.GetAndUnmarshal("v2/orders/count", &data)
@@ -85,7 +85,7 @@ func (s *Client) GetOrderCount() (*OrderCount, error) {
 	return &data, nil
 }
 
-// GetShipments get shipments from the orders returned by the query
+// GetShipments will get shipments from the orders returned by the query
 func (s *Client) GetShipments(oq Query) ([]Shipment, error) {
 	os, err := s.GetOrderQuery(oq)
 	if err != nil {
@@ -148,7 +148,7 @@ func (q Query) GetRawQuery() (raw string, err error) {
 	return
 }
 
-// GetOrderQuery Return an ordered by ID slice of Order structs based on passed in query object
+// GetOrderQuery will return an ordered by ID slice of Order structs based on passed in query object
 func (s *Client) GetOrderQuery(oq Query) (*[]Order, error) {
 	rawQuery, err := oq.GetRawQuery()
 	if err != nil {
@@ -193,12 +193,12 @@ func (s *Client) GetHydratedOrders(oq Query) (*[]Order, error) {
 	return orders, nil
 }
 
-// GetOrders Return a slice of Order structs based on passed in status
+// GetOrders will return a slice of Order structs based on passed in status
 func (s *Client) GetOrders(status int) (*[]Order, error) {
 	return s.GetOrderQuery(Query{StatusID: status})
 }
 
-// GetOrdersAndProducts Return a slice of Order structs with their products based on passed in status
+// GetOrdersAndProducts will return a slice of Order structs with their products based on passed in status
 func (s *Client) GetOrdersAndProducts(status int) (*[]Order, error) {
 	orders, err := s.GetOrders(status)
 	if err != nil {
@@ -224,5 +224,21 @@ func (s *Client) GetHydratedOrderByID(orderID string) (order Order, err error) {
 		return
 	}
 	err = order.ProductResource.EagerGet(s, &order.Products)
+	return
+}
+
+// GetAvailableStatuses will return a sorted slice of order statuses from the BC API
+func (s *Client) GetAvailableStatuses() (statuses Statuses, err error) {
+	err = s.GetAndUnmarshal(
+		"v2/order_statuses",
+		&statuses,
+	)
+	if err != nil {
+		return
+	}
+
+	sort.Slice(statuses, func(i, j int) bool {
+		return statuses[i].Order < statuses[j].Order
+	})
 	return
 }

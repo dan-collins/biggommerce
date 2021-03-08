@@ -1,9 +1,7 @@
 package order
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"sort"
 	"time"
 
@@ -75,23 +73,12 @@ func (s *Client) GetCouponsForOrders(os []Order) (err error) {
 
 // GetOrderCount Return an OrderCount struct containing statuses and counts
 func (s *Client) GetOrderCount() (*OrderCount, error) {
-	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/count", s.StoreKey)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := s.DoRequest(req)
-	if err != nil {
-		return nil, err
-	}
-
 	var data OrderCount
-	err = json.Unmarshal(res, &data)
+	err := s.GetAndUnmarshal("v2/orders/count", &data)
 	if err != nil {
 		return nil, err
 	}
+
 	sort.Slice(data.StatusCounts, func(i, j int) bool {
 		return data.StatusCounts[i].SortOrder < data.StatusCounts[j].SortOrder
 	})
@@ -112,18 +99,9 @@ func (s *Client) GetShipments(oq Query) ([]Shipment, error) {
 		eg.Go(func() error {
 			sem <- true
 			defer func() { <-sem }()
-			url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/%d/shipments", s.StoreKey, o.ID)
-			req, err := http.NewRequest("GET", url, nil)
-			if err != nil {
-				return err
-			}
-			res, err := s.DoRequest(req)
-			if err != nil {
-				return err
-			}
-
 			var data []Shipment
-			err = json.Unmarshal(res, &data)
+			url := fmt.Sprintf(s.BaseURL+"v2/orders/%d/shipments", s.StoreKey, o.ID)
+			err := s.GetAndUnmarshal(url, &data)
 			if err != nil {
 				return err
 			}
@@ -172,30 +150,21 @@ func (q Query) GetRawQuery() (raw string, err error) {
 
 // GetOrderQuery Return an ordered by ID slice of Order structs based on passed in query object
 func (s *Client) GetOrderQuery(oq Query) (*[]Order, error) {
-	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/", s.StoreKey)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.URL.RawQuery, err = oq.GetRawQuery()
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := s.DoRequest(req)
+	rawQuery, err := oq.GetRawQuery()
 	if err != nil {
 		return nil, err
 	}
 
 	var data []Order
-	err = json.Unmarshal(res, &data)
+	err = s.GetAndUnmarshalWithQuery("v2/orders/", rawQuery, &data)
 	if err != nil {
 		return nil, err
 	}
+
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].ID < data[j].ID
 	})
+
 	return &data, nil
 }
 
@@ -229,7 +198,7 @@ func (s *Client) GetOrders(status int) (*[]Order, error) {
 	return s.GetOrderQuery(Query{StatusID: status})
 }
 
-// GetOrdersAndProducts Return a slice of Order structs based on passed in status
+// GetOrdersAndProducts Return a slice of Order structs with their products based on passed in status
 func (s *Client) GetOrdersAndProducts(status int) (*[]Order, error) {
 	orders, err := s.GetOrders(status)
 	if err != nil {
@@ -240,19 +209,17 @@ func (s *Client) GetOrdersAndProducts(status int) (*[]Order, error) {
 	return orders, err
 }
 
-// GetOrderByID - return a single order with Shipping Address Populated.
-func (s *Client) GetOrderByID(orderID string) (order Order, err error) {
-	url := fmt.Sprintf(s.BaseURL+"%s/v2/orders/%s", s.StoreKey, orderID)
-
-	body, err := s.GetBody(url)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(body, &order)
+// GetHydratedOrderByID - return a single order with Products, Shipping Addresses, and Coupons Populated.
+func (s *Client) GetHydratedOrderByID(orderID string) (order Order, err error) {
+	err = s.GetAndUnmarshalWithQuery("v2/orders/", orderID, &order)
 	if err != nil {
 		return
 	}
 	err = order.ShippingResource.EagerGet(s, &order.ShippingAddresses)
+	if err != nil {
+		return
+	}
+	err = order.CouponResource.EagerGet(s, &order.Coupons)
 	if err != nil {
 		return
 	}

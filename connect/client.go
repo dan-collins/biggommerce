@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -63,4 +64,55 @@ func (s *BCClient) GetBody(url string) (body []byte, err error) {
 	}
 	body, err = s.DoRequest(req)
 	return
+}
+
+// BuildUrl - gets the golang request out of the endpoint (e.g. /v2/orders/) needed for sending to the BC api
+func (s *BCClient) BuildUrlRequest(endpoint string) (req *http.Request, err error) {
+	url := fmt.Sprintf(s.BaseURL+"%s/%s", s.StoreKey, endpoint)
+
+	req, err = http.NewRequest("GET", url, nil)
+	return
+}
+
+// GetAndUnmarshal - gets the request body of a plain url and unmarshals to passed in struct pointer
+//
+// Example of the endpoint parameter would be "/v2/orders/" and the client will handle the store key and base url pieces
+func (s *BCClient) GetAndUnmarshal(endpoint string, outData interface{}) error {
+	req, err := s.BuildUrlRequest(endpoint)
+	if err != nil {
+		return err
+	}
+
+	res, err := s.DoRequest(req)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(res, outData)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GetAndUnmarshalWithQuery - gets the request body of the url with a query string added on and unmarshals to passed in struct pointer
+//
+// Example of the endpoint parameter would be "/v2/orders/count/" and the client will handle the store key and base url pieces
+func (s *BCClient) GetAndUnmarshalWithQuery(endpoint string, rawQuery string, outData interface{}) error {
+	req, err := s.BuildUrlRequest(endpoint)
+	if err != nil {
+		return err
+	}
+	req.URL.RawQuery = rawQuery
+
+	res, err := s.DoRequest(req)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(res, outData)
+	if err != nil {
+		return err
+	}
+	return nil
 }

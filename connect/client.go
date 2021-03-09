@@ -101,9 +101,11 @@ func (s *BCClient) doUnmarshalling(req *http.Request, outData interface{}) error
 	return nil
 }
 
-// GetAndUnmarshal - gets the request body of a plain url and unmarshals to passed in struct pointer
+// GetAndUnmarshalRaw - gets the request body of a full plain bigcommerce url and unmarshals to passed in struct pointer
 //
-// Example of the endpoint parameter would be "/v2/orders/" and the client will handle the store key and base url pieces
+// Example of the fullEndpoint parameter would be "https://api.bigcommerce.com/stores/{{YOUR-STORE-KEY}}/v2/orders/12039/products"
+// the client will not manipulate the endpoint in any way.
+// This function is used by things like Resource.EagerGet
 func (s *BCClient) GetAndUnmarshalRaw(fullEndpoint string, outData interface{}) error {
 	req, err := http.NewRequest("GET", fullEndpoint, nil)
 	if err != nil {

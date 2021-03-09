@@ -85,6 +85,38 @@ func (s *Client) GetOrderCount() (*OrderCount, error) {
 	return &data, nil
 }
 
+// GetShipment will return a slice of Shipment structs containing the shipment information
+func (s *Client) GetShipment(orderID int) (*[]Shipment, error) {
+	url := fmt.Sprintf("v2/orders/%d/shipments", orderID)
+	var data []Shipment
+	err := s.GetAndUnmarshal(url, &data)
+	if err != nil {
+		return nil, err
+	}
+	return &data, nil
+}
+
+// GetShipmentsForOrders - Will attempt to concurrently fill the order slice elements with their respective shipment objects from the BC api
+func (s *Client) GetShipmentsForOrders(os []Order) (err error) {
+	var eg errgroup.Group
+	sem := make(chan bool, 20)
+	for i := range os {
+		j := i
+		eg.Go(func() error {
+			sem <- true
+			defer func() { <-sem }()
+			shipments, err := s.GetShipment(int(os[j].ID))
+			if err != nil {
+				return err
+			}
+			os[j].Shipments = *shipments
+			return nil
+		})
+	}
+	err = eg.Wait()
+	return
+}
+
 // GetShipments will get shipments from the orders returned by the query
 func (s *Client) GetShipments(oq Query) ([]Shipment, error) {
 	os, err := s.GetOrderQuery(oq)
@@ -100,7 +132,7 @@ func (s *Client) GetShipments(oq Query) ([]Shipment, error) {
 			sem <- true
 			defer func() { <-sem }()
 			var data []Shipment
-			url := fmt.Sprintf(s.BaseURL+"v2/orders/%d/shipments", s.StoreKey, o.ID)
+			url := fmt.Sprintf("v2/orders/%d/shipments", o.ID)
 			err := s.GetAndUnmarshal(url, &data)
 			if err != nil {
 				return err
@@ -189,6 +221,10 @@ func (s *Client) GetHydratedOrders(oq Query) (*[]Order, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = s.GetShipmentsForOrders(*orders)
+	if err != nil {
+		return nil, err
+	}
 
 	return orders, nil
 }
@@ -224,6 +260,14 @@ func (s *Client) GetHydratedOrderByID(orderID string) (order Order, err error) {
 		return
 	}
 	err = order.ProductResource.EagerGet(s, &order.Products)
+	if err != nil {
+		return
+	}
+	shipments, err := s.GetShipment(int(order.ID))
+	if err != nil {
+		return
+	}
+	order.Shipments = *shipments
 	return
 }
 

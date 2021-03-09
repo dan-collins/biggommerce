@@ -83,16 +83,33 @@ func (s *BCClient) GetAndUnmarshal(endpoint string, outData interface{}) error {
 		return err
 	}
 
+	return s.doUnmarshalling(req, outData)
+}
+
+func (s *BCClient) doUnmarshalling(req *http.Request, outData interface{}) error {
 	res, err := s.DoRequest(req)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(res, outData)
+	if len(res) > 0 {
+		err = json.Unmarshal(res, outData)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GetAndUnmarshal - gets the request body of a plain url and unmarshals to passed in struct pointer
+//
+// Example of the endpoint parameter would be "/v2/orders/" and the client will handle the store key and base url pieces
+func (s *BCClient) GetAndUnmarshalRaw(fullEndpoint string, outData interface{}) error {
+	req, err := http.NewRequest("GET", fullEndpoint, nil)
 	if err != nil {
 		return err
 	}
-	return nil
+	return s.doUnmarshalling(req, outData)
 }
 
 // GetAndUnmarshalWithQuery - gets the request body of the url with a query string added on and unmarshals to passed in struct pointer
@@ -105,14 +122,5 @@ func (s *BCClient) GetAndUnmarshalWithQuery(endpoint string, rawQuery string, ou
 	}
 	req.URL.RawQuery = rawQuery
 
-	res, err := s.DoRequest(req)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(res, outData)
-	if err != nil {
-		return err
-	}
-	return nil
+	return s.doUnmarshalling(req, outData)
 }

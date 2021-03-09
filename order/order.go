@@ -1,7 +1,6 @@
 package order
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/dan-collins/biggommerce/primative"
@@ -74,6 +73,7 @@ type Order struct {
 	ShippingAddresses                       []ShippingAddress
 	CouponResource                          Resource `json:"coupons,omitempty"`
 	Coupons                                 []Coupon
+	Shipments                               []Shipment
 	ExternalID                              interface{} `json:"external_id"`
 	ExternalMerchantID                      interface{} `json:"external_merchant_id"`
 	TaxProviderID                           string      `json:"tax_provider_id,omitempty"`
@@ -116,12 +116,9 @@ type Query struct {
 // EagerGet - attempts to unmarshal a resource url into an interface, preferably one intended to unmarshal the json body of that url.
 func (r Resource) EagerGet(s *Client, i interface{}) error {
 	url := r.URL
-	body, err := s.GetBody(url)
+	err := s.GetAndUnmarshalRaw(url, &i)
 	if err != nil {
 		return err
 	}
-	if len(body) > 0 {
-		err = json.Unmarshal(body, i)
-	}
-	return err
+	return nil
 }

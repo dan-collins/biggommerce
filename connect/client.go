@@ -126,3 +126,13 @@ func (s *BCClient) GetAndUnmarshalWithQuery(endpoint string, rawQuery string, ou
 
 	return s.doUnmarshalling(req, outData)
 }
+
+type Client interface {
+	SetBaseURL(url string)
+	DoRequest(req *http.Request) ([]byte, error)
+	GetBody(url string) (body []byte, err error)
+	BuildUrlRequest(endpoint string) (req *http.Request, err error)
+	GetAndUnmarshal(endpoint string, outData interface{}) error
+	GetAndUnmarshalRaw(fullEndpoint string, outData interface{}) error
+	GetAndUnmarshalWithQuery(endpoint string, rawQuery string, outData interface{}) error
+}

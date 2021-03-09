@@ -83,16 +83,35 @@ func (s *BCClient) GetAndUnmarshal(endpoint string, outData interface{}) error {
 		return err
 	}
 
+	return s.doUnmarshalling(req, outData)
+}
+
+func (s *BCClient) doUnmarshalling(req *http.Request, outData interface{}) error {
 	res, err := s.DoRequest(req)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(res, outData)
+	if len(res) > 0 {
+		err = json.Unmarshal(res, outData)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GetAndUnmarshalRaw - gets the request body of a full plain bigcommerce url and unmarshals to passed in struct pointer
+//
+// Example of the fullEndpoint parameter would be "https://api.bigcommerce.com/stores/{{YOUR-STORE-KEY}}/v2/orders/12039/products"
+// the client will not manipulate the endpoint in any way.
+// This function is used by things like Resource.EagerGet
+func (s *BCClient) GetAndUnmarshalRaw(fullEndpoint string, outData interface{}) error {
+	req, err := http.NewRequest("GET", fullEndpoint, nil)
 	if err != nil {
 		return err
 	}
-	return nil
+	return s.doUnmarshalling(req, outData)
 }
 
 // GetAndUnmarshalWithQuery - gets the request body of the url with a query string added on and unmarshals to passed in struct pointer
@@ -105,14 +124,15 @@ func (s *BCClient) GetAndUnmarshalWithQuery(endpoint string, rawQuery string, ou
 	}
 	req.URL.RawQuery = rawQuery
 
-	res, err := s.DoRequest(req)
-	if err != nil {
-		return err
-	}
+	return s.doUnmarshalling(req, outData)
+}
 
-	err = json.Unmarshal(res, outData)
-	if err != nil {
-		return err
-	}
-	return nil
+type Client interface {
+	SetBaseURL(url string)
+	DoRequest(req *http.Request) ([]byte, error)
+	GetBody(url string) (body []byte, err error)
+	BuildUrlRequest(endpoint string) (req *http.Request, err error)
+	GetAndUnmarshal(endpoint string, outData interface{}) error
+	GetAndUnmarshalRaw(fullEndpoint string, outData interface{}) error
+	GetAndUnmarshalWithQuery(endpoint string, rawQuery string, outData interface{}) error
 }

@@ -82,7 +82,8 @@ type Order struct {
 	CustomStatus                            string      `json:"custom_status,omitempty"`
 }
 
-// Query struct to handle orders endpoint search query params
+// Query struct to handle orders endpoint search query params, if you want orders with a status of 0 ("incomplete" in BC)
+// you should set StatusIDIsZero to true, otherwise it will be ignored as a zero value when building the REST query
 type Query struct {
 	MinID              int       `url:"min_id,omitempty"`
 	MaxID              int       `url:"max_id,omitempty"`
@@ -91,6 +92,7 @@ type Query struct {
 	CustomerID         int       `url:"customer_id,omitempty"`
 	Email              string    `url:"email,omitempty"`
 	StatusID           int       `url:"status_id,omitempty"`
+	StatusIDIsZero     bool      `url:"-"`
 	CartID             string    `url:"cart_id,omitempty"`
 	PaymentMethod      string    `url:"payment_method,omitempty"`
 	MinDateCreated     time.Time `url:"-"`

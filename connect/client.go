@@ -15,15 +15,17 @@ type BCClient struct {
 	AuthClient string
 	StoreKey   string
 	BaseURL    string
+	Limit      int
 }
 
-//NewClient create a new client wrapper based on BC connection details
+//NewClient create a new client wrapper based on BC connection details, default result limit is set to 50
 func NewClient(authToken, authClient, storeKey string) *BCClient {
 	return &BCClient{
 		AuthToken:  authToken,
 		AuthClient: authClient,
 		StoreKey:   storeKey,
 		BaseURL:    baseBCURL,
+		Limit:      50,
 	}
 }
 

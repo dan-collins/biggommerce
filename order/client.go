@@ -20,6 +20,7 @@ func NewClient(authToken, authClient, storeKey string) *Client {
 	bcClient := connect.NewClient(authToken, authClient, storeKey)
 	orderClient := Client{}
 	orderClient.BCClient = *bcClient
+	orderClient.Limit = 250
 	return &orderClient
 }
 
@@ -176,28 +177,56 @@ func (q Query) GetRawQuery() (raw string, err error) {
 	if err != nil {
 		return "", err
 	}
+	if q.StatusIDIsZero {
+		v.Add("status_id", "0")
+	}
 	raw = v.Encode()
 	return
 }
 
 // GetOrderQuery will return an ordered by ID slice of Order structs based on passed in query object
-func (s *Client) GetOrderQuery(oq Query) (*[]Order, error) {
-	rawQuery, err := oq.GetRawQuery()
-	if err != nil {
-		return nil, err
-	}
-
+func (s *Client) GetOrderFromRawQuery(rawQuery string) (*[]Order, error) {
 	var data []Order
-	err = s.GetAndUnmarshalWithQuery("v2/orders/", rawQuery, &data)
+	err := s.GetAndUnmarshalWithQuery("v2/orders/", rawQuery, &data)
 	if err != nil {
 		return nil, err
 	}
+	return &data, nil
+}
 
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].ID < data[j].ID
+// GetOrderQuery will return an ordered by ID slice of Order structs based on passed in query object
+func (s *Client) GetOrderQuery(oq Query) (*[]Order, error) {
+	if oq.Limit == 0 {
+		oq.Limit = s.Limit
+	}
+	var allOrders []Order
+	orderCount := s.Limit + 1
+	getAllPages := true
+	page := 0
+
+	for getAllPages && orderCount >= s.Limit {
+		if page == 0 && oq.Page != 0 {
+			getAllPages = false
+		} else {
+			page = page + 1
+			oq.Page = page
+		}
+		rawQuery, err := oq.GetRawQuery()
+		if err != nil {
+			return nil, err
+		}
+		data, err := s.GetOrderFromRawQuery(rawQuery)
+		if err != nil {
+			return nil, err
+		}
+		orderCount = len(*data)
+		allOrders = append(allOrders, *data...)
+	}
+	sort.Slice(allOrders, func(i, j int) bool {
+		return allOrders[i].ID < allOrders[j].ID
 	})
 
-	return &data, nil
+	return &allOrders, nil
 }
 
 // GetHydratedOrders Return a slice of Order structs based on passed in query object
